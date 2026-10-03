@@ -1,0 +1,18 @@
+{
+  "name": "epasslist",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": ["apps/*", "services/*", "packages/*"],
+  "scripts": {
+    "dev:public-web": "npm --workspace apps/public-web run dev",
+    "dev:staff-web": "npm --workspace apps/staff-web run dev",
+    "dev:public-api": "npm --workspace services/public-api run dev",
+    "dev:staff-api": "npm --workspace services/staff-api run dev",
+    "sync": "npm --workspace services/sync-service run sync",
+    "build": "npm run build:public-web && npm run build:staff-web && npm run build:public-api && npm run build:staff-api",
+    "build:public-web": "npm --workspace apps/public-web run build",
+    "build:staff-web": "npm --workspace apps/staff-web run build",
+    "build:public-api": "npm --workspace services/public-api run build",
+    "build:staff-api": "npm --workspace services/staff-api run build"
+  }
+}

@@ -1,0 +1,46 @@
+services:
+  - type: web
+    name: epasslist-public-api
+    runtime: node
+    rootDir: services/public-api
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PUBLIC_DATABASE_URL
+        sync: false
+      - key: PUBLIC_WEB_ORIGIN
+        sync: false
+      - key: SYNC_SECRET
+        sync: false
+
+  - type: web
+    name: epasslist-staff-api
+    runtime: node
+    rootDir: services/staff-api
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: STAFF_DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: STAFF_WEB_ORIGINS
+        sync: false
+
+  - type: worker
+    name: epasslist-sync
+    runtime: node
+    rootDir: services/sync-service
+    buildCommand: npm install
+    startCommand: npm run sync
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: STAFF_DATABASE_URL
+        sync: false
+      - key: PUBLIC_DATABASE_URL
+        sync: false

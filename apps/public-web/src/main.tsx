@@ -1,0 +1,16 @@
+import React,{useState} from 'react';
+import {createRoot} from 'react-dom/client';
+import './styles.css';
+
+const API=import.meta.env.VITE_PUBLIC_API_URL||'http://localhost:4001';
+
+type Result={arn:string;fullName:string;passportNumber?:string;branchName?:string;arrivalDate?:string;publicStatus:'Collected'|'Not Collected'};
+function formatDate(v?:string){if(!v)return 'Not available';const d=new Date(`${v}T00:00:00`);return new Intl.DateTimeFormat('en-GB',{day:'2-digit',month:'long',year:'numeric'}).format(d);}
+function App(){
+ const [q,setQ]=useState(''); const [type,setType]=useState<'auto'|'arn'|'name'|'passport'>('auto'); const [loading,setLoading]=useState(false); const [results,setResults]=useState<Result[]>([]); const [error,setError]=useState('');
+ async function search(e:React.FormEvent){e.preventDefault();if(q.trim().length<2){setError('Enter at least 2 characters.');return;}setLoading(true);setError('');setResults([]);try{const r=await fetch(`${API}/api/public/search?q=${encodeURIComponent(q)}&type=${type}`);const data=await r.json();if(!r.ok)throw new Error(data.message||'Search failed.');setResults(data.results||[]);if(!(data.results||[]).length)setError('No passport found. Check the ARN or name and try again.');}catch(err){setError(err instanceof Error?err.message:'Search failed.');}finally{setLoading(false);}}
+ return <div className="page"><header><div className="brand"><div className="logo">eP</div><div><strong>ePassport</strong><span>Passport information portal</span></div></div><a href="#site-portal">Site Portal</a></header><main><section className="hero"><p className="eyebrow">PUBLIC PASSPORT CHECK</p><h1>Check your passport</h1><p>Search your passport information using your ARN, full name, or passport number.</p><form onSubmit={search} className="search"><div className="row"><select value={type} onChange={e=>setType(e.target.value as any)}><option value="auto">All</option><option value="arn">ARN</option><option value="name">Full Name</option><option value="passport">Passport Number</option></select><input value={q} onChange={e=>setQ(e.target.value)} placeholder="Enter ARN or full name"/><button disabled={loading}>{loading?'Searching…':'Search'}</button></div></form></section>
+<section className="results">{error&&<div className="notice">{error}</div>}{results.map(r=><article className="card" key={r.arn}><div className="cardTop"><div><small>ARN</small><h2>{r.arn}</h2></div><span className={r.publicStatus==='Collected'?'status collected':'status'}>{r.publicStatus}</span></div><div className="grid"><div><small>Full Name</small><b>{r.fullName}</b></div><div><small>Passport Number</small><b>{r.passportNumber||'—'}</b></div><div><small>Branch</small><b>{r.branchName||'—'}</b></div><div><small>Arrival Date</small><b>{formatDate(r.arrivalDate)}</b></div></div></article>)}</section>
+<section id="site-portal" className="portal"><div><p className="eyebrow">STAFF ACCESS</p><h2>Site Portal</h2><p>Authorized immigration staff can access their branch portal.</p></div><div className="portalLinks"><a href="https://adamaepass.vercel.app">Adama</a><a href="https://hossanaepass.vercel.app">Hossana</a><a href="https://hawassaepass.vercel.app">Hawassa</a></div></section></main><footer>© {new Date().getFullYear()} ePassport Platform</footer></div>
+}
+createRoot(document.getElementById('root')!).render(<App/>);
